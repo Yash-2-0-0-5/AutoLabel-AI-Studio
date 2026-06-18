@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "title": "Product A",
+    "price": 29.99,
+    "tags": [
+      "electronics",
+      "gadget"
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Product B",
+    "price": 49.99,
+    "tags": [
+      "electronics",
+      "accessory"
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Product C",
+    "price": 199.99,
+    "tags": [
+      "electronics",
+      "premium"
+    ]
+  }
+]

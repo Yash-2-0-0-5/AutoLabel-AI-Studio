@@ -1,7 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
+import sys
 from dotenv import load_dotenv
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from database import init_db
+from routes.upload import router as upload_router
 
 load_dotenv()
 
@@ -19,6 +25,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Initialize database
+init_db()
+
+# Include routers
+app.include_router(upload_router)
 
 @app.get("/")
 def read_root():

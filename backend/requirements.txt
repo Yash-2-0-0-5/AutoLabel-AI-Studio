@@ -9,3 +9,4 @@ google-generativeai
 scikit-learn
 xgboost
 python-dotenv
+Pillow
