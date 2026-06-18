@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+python-multipart
+pandas
+openpyxl
+google-generativeai
+scikit-learn
+xgboost
+python-dotenv
