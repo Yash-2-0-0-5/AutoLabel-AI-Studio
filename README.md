@@ -58,8 +58,8 @@ docker-compose up
 ```
 
 This will start both services:
-- Backend: http://localhost:8000
-- Frontend: http://localhost:3000
+- Backend: http://localhost:8080
+- Frontend: http://localhost:5173
 
 ## Features
 
