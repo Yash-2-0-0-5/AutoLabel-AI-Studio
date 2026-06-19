@@ -12,6 +12,17 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+# Import local model trainer (will initialize lazily)
+_model_trainer = None
+
+def get_model_trainer():
+    """Get or initialize model trainer"""
+    global _model_trainer
+    if _model_trainer is None:
+        from services.model_training import LocalModelTrainer
+        _model_trainer = LocalModelTrainer()
+    return _model_trainer
+
 class GeminiLabelingService:
     """Service for AI-powered data labeling using Google Gemini API"""
 
@@ -301,15 +312,19 @@ Now classify the audio:"""
             logger.error(f"Error labeling audio data: {str(e)}")
             raise
 
-    def label_data_item(self, data_item) -> Tuple[str, float]:
+    def label_data_item(self, data_item, dataset_id: Optional[int] = None) -> Tuple[str, float, str]:
         """
         Route data item to appropriate labeling function based on type.
 
+        Uses local model first if available, falls back to Gemini API.
+
         Args:
             data_item: DataItem model instance
+            dataset_id: Optional dataset ID to check for local model
 
         Returns:
-            Tuple of (label, confidence_score)
+            Tuple of (label, confidence_score, model_used)
+            where model_used is 'local' or 'gemini'
 
         Raises:
             ValueError: If labeling fails
@@ -317,6 +332,33 @@ Now classify the audio:"""
         try:
             file_type = data_item.file_type.lower()
 
+            # Try local model first for text data
+            if file_type in ['csv', 'excel', 'json'] and dataset_id:
+                try:
+                    trainer = get_model_trainer()
+                    if trainer.model_exists(dataset_id):
+                        label, confidence = trainer.predict(
+                            dataset_id,
+                            data_item.content_preview
+                        )
+
+                        # Use local model only if confidence is high enough
+                        if confidence >= 0.7:
+                            logger.info(
+                                f"Used local model for item {data_item.id}: "
+                                f"label={label}, confidence={confidence:.4f}"
+                            )
+                            return label, confidence, "local"
+                        else:
+                            logger.info(
+                                f"Local model confidence too low ({confidence:.4f}), "
+                                f"falling back to Gemini"
+                            )
+                except Exception as e:
+                    logger.warning(f"Local model inference failed: {str(e)}")
+                    # Fall through to Gemini API
+
+            # Fall back to Gemini API
             if file_type in ['csv', 'excel', 'json']:
                 result = self.label_text_data(
                     data_item.content_preview,
@@ -336,7 +378,7 @@ Now classify the audio:"""
                     f"Unsupported file type for labeling: {file_type}"
                 )
 
-            return result["label"], result["confidence_score"]
+            return result["label"], result["confidence_score"], "gemini"
 
         except Exception as e:
             logger.error(

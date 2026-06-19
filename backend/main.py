@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from database import init_db
 from routes.upload import router as upload_router
 from routes.labeling import router as labeling_router
+from routes.export import router as export_router
 
 # Configure logging
 logging.basicConfig(
@@ -41,6 +42,7 @@ init_db()
 # Include routers
 app.include_router(upload_router)
 app.include_router(labeling_router)
+app.include_router(export_router)
 
 @app.get("/")
 def read_root():
