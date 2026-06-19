@@ -17,7 +17,9 @@
       "Bash(python test_frontend_workflow.py)",
       "Bash(git commit -m 'Implement Step 4: Frontend UI and Human-in-the-Loop Workflow *)",
       "Bash(python test_step5.py)",
-      "Bash(git commit -m 'Implement Step 5: Active Learning, Local Model Retraining & Export *)"
+      "Bash(git commit -m 'Implement Step 5: Active Learning, Local Model Retraining & Export *)",
+      "Bash(chmod +x start.sh)",
+      "Bash(git commit -m 'Add startup scripts and quick start guide *)"
     ]
   }
 }
