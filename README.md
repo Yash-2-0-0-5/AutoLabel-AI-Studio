@@ -73,8 +73,8 @@ This will start both services:
 ## API Documentation
 
 Once the backend is running, visit:
-- http://localhost:8000/docs (Swagger UI)
-- http://localhost:8000/redoc (ReDoc)
+- http://localhost:8080/docs (Swagger UI)
+- http://localhost:8080/redoc (ReDoc)
 
 ## Development
 
