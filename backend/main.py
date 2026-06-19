@@ -2,12 +2,21 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import sys
+import logging
 from dotenv import load_dotenv
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from database import init_db
 from routes.upload import router as upload_router
+from routes.labeling import router as labeling_router
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -31,6 +40,7 @@ init_db()
 
 # Include routers
 app.include_router(upload_router)
+app.include_router(labeling_router)
 
 @app.get("/")
 def read_root():

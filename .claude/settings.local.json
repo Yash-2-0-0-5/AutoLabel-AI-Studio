@@ -11,7 +11,9 @@
       "Bash(python -m uvicorn main:app --host 0.0.0.0 --port 8000)",
       "Bash(curl -s http://localhost:8000/health)",
       "Bash(python test_upload.py)",
-      "Bash(python)"
+      "Bash(python)",
+      "Bash(python test_gemini_service.py)",
+      "Bash(git commit -m 'Implement Step 3: Gemini AI Auto-Labeling Engine *)"
     ]
   }
 }
