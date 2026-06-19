@@ -1,49 +1,109 @@
 import { useState, useEffect } from 'react'
+import UploadSection from './components/UploadSection'
+import DatasetsList from './components/DatasetsList'
+import DatasetView from './components/DatasetView'
+import ReviewQueue from './components/ReviewQueue'
 import './App.css'
 
 function App() {
-  const [message, setMessage] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [currentView, setCurrentView] = useState('dashboard')
+  const [selectedDatasetId, setSelectedDatasetId] = useState(null)
+  const [backendHealth, setBackendHealth] = useState(true)
 
   useEffect(() => {
-    fetch('/api/')
+    // Check backend health on load
+    fetch('http://localhost:8000/health')
       .then(res => res.json())
-      .then(data => {
-        setMessage(data.message)
-        setLoading(false)
-      })
-      .catch(err => {
-        setError(err.message)
-        setLoading(false)
-      })
+      .then(() => setBackendHealth(true))
+      .catch(() => setBackendHealth(false))
   }, [])
 
+  const handleDatasetSelect = (datasetId) => {
+    setSelectedDatasetId(datasetId)
+    setCurrentView('dataset')
+  }
+
+  const handleBack = () => {
+    setCurrentView('dashboard')
+    setSelectedDatasetId(null)
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full">
-          <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">
-            AutoLabel AI Studio
-          </h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-3xl font-bold text-gray-900">
+              AutoLabel AI Studio
+            </h1>
+            {!backendHealth && (
+              <div className="px-4 py-2 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-700 font-medium">
+                  Backend unavailable - Check if server is running
+                </p>
+              </div>
+            )}
+          </div>
 
-          {loading ? (
-            <p className="text-gray-600 text-center">Connecting to backend...</p>
-          ) : error ? (
-            <div className="bg-red-50 border border-red-200 rounded p-4">
-              <p className="text-red-700">Error: {error}</p>
-            </div>
-          ) : (
-            <div className="bg-green-50 border border-green-200 rounded p-4">
-              <p className="text-green-700 text-center font-semibold">{message}</p>
-            </div>
-          )}
-
-          <div className="mt-6 text-center text-gray-600 text-sm">
-            <p>Ready for intelligent data labeling</p>
+          {/* Navigation Tabs */}
+          <div className="flex gap-2 border-b border-gray-200">
+            <button
+              onClick={() => setCurrentView('dashboard')}
+              className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+                currentView === 'dashboard'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Dashboard
+            </button>
+            <button
+              onClick={() => setCurrentView('review')}
+              className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+                currentView === 'review'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Review Queue
+            </button>
           </div>
         </div>
-      </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        {currentView === 'dashboard' && !selectedDatasetId && (
+          <div className="space-y-6">
+            <UploadSection
+              onUploadSuccess={() => {
+                // Refresh dataset list by reloading
+                window.location.reload()
+              }}
+            />
+            <DatasetsList onSelectDataset={handleDatasetSelect} />
+          </div>
+        )}
+
+        {currentView === 'dataset' && selectedDatasetId && (
+          <DatasetView
+            datasetId={selectedDatasetId}
+            onBack={handleBack}
+          />
+        )}
+
+        {currentView === 'review' && (
+          <ReviewQueue />
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-gray-800 text-gray-400 text-sm py-6 mt-12">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <p>AutoLabel AI Studio v0.1.0 | Powered by Gemini AI</p>
+        </div>
+      </footer>
     </div>
   )
 }

@@ -251,3 +251,48 @@ def review_item(item_id: int, is_reviewed: bool, db: Session = Depends(get_db)):
         "is_reviewed": is_reviewed,
         "status": "success"
     }
+
+@router.put("/items/{item_id}/correct")
+def correct_item_label(
+    item_id: int,
+    corrected_label: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Manually correct an item's label (human-in-the-loop).
+    Sets confidence_score to 1.0 and marks as reviewed.
+    """
+    item = db.query(DataItem).filter(DataItem.id == item_id).first()
+
+    if not item:
+        raise HTTPException(status_code=404, detail="Data item not found")
+
+    if not corrected_label or len(corrected_label.strip()) == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Corrected label cannot be empty"
+        )
+
+    if len(corrected_label) > 50:
+        raise HTTPException(
+            status_code=400,
+            detail="Label must be 50 characters or less"
+        )
+
+    # Update with human correction
+    item.final_label = corrected_label.strip()
+    item.confidence_score = 1.0
+    item.is_reviewed = True
+    db.commit()
+
+    logger.info(
+        f"Item {item_id} manually corrected: label={item.final_label}"
+    )
+
+    return {
+        "item_id": item_id,
+        "final_label": item.final_label,
+        "confidence_score": item.confidence_score,
+        "is_reviewed": item.is_reviewed,
+        "status": "success"
+    }
